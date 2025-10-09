@@ -2,7 +2,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import axios from "axios";
 import pg from "pg";
-import booksRouter from "./routes/books.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -23,7 +22,6 @@ const port = 3000;
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use("/books", booksRouter);
 app.set("view engine", "ejs");
 
 // Routes
@@ -31,9 +29,10 @@ app.set("view engine", "ejs");
 app.get("/", async (req, res) => {
   try {
     const result = await db.query("SELECT * FROM books ORDER BY id DESC");
+    const books = result.rows;
     res.render("index", {
       message: "Welcome to the Book Library",
-      books: result.rows
+      books: books,
     });
   } catch (err) {
     console.error(err);
