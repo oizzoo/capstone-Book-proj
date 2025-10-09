@@ -6,7 +6,27 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <h1><%= message %></h1>
-  <p>Everything is connected correctly ✅</p>
+  <div class="container">
+    <h1><%= message %></h1>
+    <h2>Books</h2>
+    <ul class="book-list">
+    <% if (books && books.length > 0) { %>
+      <% books.forEach(function(book) { %>
+        <li class="book-item">
+          <img class="book-cover" src="<%= book.cover_url %>" alt="Cover">
+          <div class="book-details">
+            <span class="book-title"><%= book.title %></span>
+            <span class="book-author">by <%= book.author %></span>
+            <span class="book-rating">★ <%= book.rating %></span>
+            <span class="book-review"><%= book.review %></span>
+            <span class="book-date">Read on: <%= book.date_read ? book.date_read.toISOString().slice(0, 10) : "No data" %></span>
+          </div>
+        </li>
+      <% }); %>
+    <% } else { %>
+      <li>No books.</li>
+    <% } %>
+    </ul>
+  </div>
 </body>
 </html>

@@ -1,0 +1,117 @@
+body {
+  background: linear-gradient(120deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 32px rgba(44, 62, 80, 0.12);
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #2d3a4b;
+  margin-bottom: 0.5em;
+  letter-spacing: 1px;
+}
+
+h2 {
+  color: #4a6073;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.book-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.book-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  background: #f7fafc;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.06);
+  margin-bottom: 28px;
+  padding: 20px 24px;
+  transition: box-shadow 0.2s;
+}
+
+.book-item:hover {
+  box-shadow: 0 6px 24px rgba(44, 62, 80, 0.13);
+}
+
+.book-cover {
+  width: 90px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.10);
+  background: #eaeaea;
+}
+
+.book-details {
+  flex: 1;
+  text-align: left;
+}
+
+.book-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3a4b;
+}
+
+.book-author {
+  color: #6c7a89;
+  font-size: 1rem;
+  margin-left: 8px;
+}
+
+.book-rating {
+  color: #f39c12;
+  font-weight: 500;
+  margin-left: 12px;
+}
+
+.book-review {
+  display: block;
+  margin: 12px 0;
+  color: #34495e;
+  font-style: italic;
+  font-size: 1rem;
+}
+
+.book-date {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 12px 4px;
+  }
+  .book-item {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 8px;
+  }
+  .book-details {
+    text-align: center;
+  }
+}
