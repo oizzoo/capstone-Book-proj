@@ -24,6 +24,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 
+// search function
+async function searchByTitle(title) {
+  try {
+    const response = await axios.get(`https://openlibrary.org/search.json?title=${title}`);
+    return response.data.docs;
+  } catch (error) {
+    console.error("Error fetching data from Open Library API:", error);
+    return [];  
+  }
+}
+
 // Routes
 
 app.get("/", async (req, res) => {
@@ -31,7 +42,7 @@ app.get("/", async (req, res) => {
     const result = await db.query("SELECT * FROM books ORDER BY id DESC");
     const books = result.rows;
     res.render("index", {
-      message: "Welcome to the Book Library",
+      message: "Welcome to your personal library – track the books you've read, plan the ones you want to read, and manage your reading journey!",
       books: books,
     });
   } catch (err) {
@@ -39,6 +50,50 @@ app.get("/", async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+app.post("/add-book", async (req, res) => {
+  const { title, rating, review, date_read } = req.body;
+  const cleanedTitle = title.trim();
+
+  try {
+    const books = await searchByTitle(cleanedTitle);
+
+    if (!books || books.length === 0) {
+      return res.status(404).send("Book not found in Open Library.");
+    }
+
+    const book = books[0];
+
+    const bookCover = book.cover_i
+      ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+      : "https://via.placeholder.com/150x200?text=No+Cover";
+
+    const author = book.author_name ? book.author_name[0] : "Unknown";
+    const bookTitle = book.title || cleanedTitle;
+
+    // check for duplicate
+    const existing = await db.query(
+      "SELECT * FROM books WHERE title = $1 AND author = $2",
+      [bookTitle, author]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(409).send("Book already exists in your library.");
+    }
+
+    await db.query(
+      "INSERT INTO books (title, author, rating, review, date_read, cover_url) VALUES ($1, $2, $3, $4, $5, $6)",
+      [bookTitle, author, rating, review, date_read, bookCover]
+    );
+
+    res.redirect("/");
+  } catch (error) {
+    console.error("Whoops, we got an error while adding book:", error);
+    res.status(500).send("Server Error");
+  }
+});
+
+
 
 // Server start
 app.listen(port, () => {
