@@ -34,6 +34,13 @@ h2 {
   letter-spacing: 0.5px;
 }
 
+.h2-books {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
 .book-list {
   list-style: none;
   padding: 0;
@@ -110,7 +117,7 @@ h2 {
   text-align: left;
 }
 
-.book-form label {
+.book-form label{
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
@@ -118,7 +125,8 @@ h2 {
 }
 
 .book-form input,
-.book-form textarea {
+.book-form textarea,
+.book-form select {
   width: 95%;
   padding: 10px 12px;
   margin-bottom: 16px;
@@ -129,7 +137,8 @@ h2 {
 }
 
 .book-form input:focus,
-.book-form textarea:focus {
+.book-form textarea:focus,
+.book-form select:focus {
   border-color: #4a90e2;
   outline: none;
 }
@@ -160,6 +169,32 @@ h2 {
   transition: background 0.2s;
   margin-bottom: 16px;
 }
+
+.book-status {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  background-color: #eee;
+}
+
+.book-status.finished {
+  background-color: #dff0d8;
+  color: #3c763d;
+}
+
+.book-status.reading {
+  background-color: #d9edf7;
+  color: #31708f;
+}
+
+.book-status.planned {
+  background-color: #fcf8e3;
+  color: #8a6d3b;
+}
+
 
 @media (max-width: 600px) {
   .container {

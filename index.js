@@ -52,7 +52,7 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/add-book", async (req, res) => {
-  let { title, rating, review, date_read } = req.body;
+  let { title, rating, review, date_read, status  } = req.body;
   if (!date_read) {
     date_read = null;
   }
@@ -69,7 +69,7 @@ app.post("/add-book", async (req, res) => {
     const book = books[0];
 
     const bookCover = book.cover_i
-      ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+      ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
       : "https://via.placeholder.com/150x200?text=No+Cover";
 
     const author = book.author_name ? book.author_name[0] : "Unknown";
@@ -86,8 +86,8 @@ app.post("/add-book", async (req, res) => {
     }
 
     await db.query(
-      "INSERT INTO books (title, author, rating, review, date_read, cover_url) VALUES ($1, $2, $3, $4, $5, $6)",
-      [bookTitle, author, rating, review, date_read, bookCover]
+      "INSERT INTO books (title, author, rating, review, date_read, cover_url, status) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [bookTitle, author, rating, review, date_read, bookCover, status ]
     );
 
     res.redirect("/");
