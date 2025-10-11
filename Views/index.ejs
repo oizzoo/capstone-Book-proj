@@ -12,27 +12,28 @@
     <button id="toggle-form-button" class="toggle-form-button">Add another book</button>
 
     <!-- FORM -->
-    <form action="/add-book" method="POST" class="book-form hide" id="book-form">
-      <label for="title">Title:</label>
-      <input type="text" id="title" name="title" placeholder="Enter book title" required>
-      
-      <label for="author">Author:</label>
-      <input type="text" id="author" name="author" placeholder="Enter author name">
-      
-      <label for="isbn">ISBN (optional):</label>
-      <input type="text" id="isbn" name="isbn" placeholder="e.g., 9780385533225">
-      
-      <label for="rating">Rating (0-10):</label>
-      <input type="number" id="rating" name="rating" min="0" max="10" placeholder="Enter rating" required>
-      
-      <label for="review">Review:</label>
-      <textarea id="review" name="review" placeholder="Enter your review" required></textarea>
-      
-      <label for="date_read">Date Read:</label>
-      <input type="date" id="date_read" name="date_read" required>
-      
-      <button type="submit">Add a Book</button>
-    </form>
+
+      <form action="/add-book" method="POST" class="book-form hide" id="book-form">
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" placeholder="Enter book title" required>
+        
+        <label for="author">Author:</label>
+        <input type="text" id="author" name="author" placeholder="Enter author name">
+        
+        <label for="isbn">ISBN (optional):</label>
+        <input type="text" id="isbn" name="isbn" placeholder="e.g., 9780385533225">
+        
+        <label for="rating">Rating (0-10):</label>
+        <input type="number" id="rating" name="rating" min="0" max="10" placeholder="Enter rating">
+        
+        <label for="review">Review:</label>
+        <textarea id="review" name="review" placeholder="Enter your review"></textarea>
+        
+        <label for="date_read">Date Read:</label>
+        <input type="date" id="date_read" name="date_read">
+        
+        <button type="submit">Add a Book</button>
+      </form>
 
     <h2>Books</h2>
     <ul class="book-list">
@@ -46,6 +47,10 @@
             <span class="book-rating">★ <%= book.rating %></span>
             <span class="book-review"><%= book.review %></span>
             <span class="book-date">Read on: <%= book.date_read ? book.date_read.toISOString().slice(0, 10) : "No data" %></span>
+            <form action="/delete-book/<%= book.id %>" method="POST" class="delete-form">
+              <button type="submit" class="delete-button">Delete</button>
+            </form>
+            <input type="checkbox">Still reading this book</input>
           </div>
         </li>
       <% }); %>

@@ -52,7 +52,11 @@ app.get("/", async (req, res) => {
 });
 
 app.post("/add-book", async (req, res) => {
-  const { title, rating, review, date_read } = req.body;
+  let { title, rating, review, date_read } = req.body;
+  if (!date_read) {
+    date_read = null;
+  }
+
   const cleanedTitle = title.trim();
 
   try {
@@ -93,6 +97,16 @@ app.post("/add-book", async (req, res) => {
   }
 });
 
+app.post("/delete-book/:id", async (req, res) => {
+  const bookId = req.params.id;
+  try {
+    await db.query("DELETE FROM books WHERE id = $1", [bookId]);
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error deleting book:", error);
+    res.status(500).send("Server Error");
+  }
+});
 
 
 // Server start
