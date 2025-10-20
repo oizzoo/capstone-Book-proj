@@ -1,0 +1,28 @@
+
+<form action="/add-book" method="POST" class="book-form hide" id="book-form">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" placeholder="Enter book title" required>
+
+    <label for="author">Author:</label>
+    <input type="text" id="author" name="author" placeholder="Enter author name">
+
+    <label for="isbn">ISBN (optional):</label>
+    <input type="text" id="isbn" name="isbn" placeholder="e.g., 9780385533225">
+
+    <label for="rating">Rating (0-10):</label>
+    <input type="number" id="rating" name="rating" min="0" max="10" placeholder="Enter rating" requiredclear>
+
+    <label for="review">Review:</label>
+    <textarea id="review" name="review" placeholder="Enter your review"></textarea>
+
+    <label for="date_read">Date Read:</label>
+    <input type="date" id="date_read" name="date_read">
+
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+        <option value="finished">Finished</option>
+        <option value="reading">Currently Reading</option>
+        <option value="planned">Want to Read</option>
+    </select>
+    <button type="submit">Add a Book</button>
+</form>

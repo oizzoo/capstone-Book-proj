@@ -44,6 +44,7 @@ app.get("/", async (req, res) => {
     res.render("index", {
       message: "Welcome to your personal library – track the books you've read, plan the ones you want to read, and manage your reading journey!",
       books: books,
+      showAddButton: true,
     });
   } catch (err) {
     console.error(err);
@@ -97,6 +98,8 @@ app.post("/add-book", async (req, res) => {
   }
 });
 
+// Selecting books by status
+
 app.get("/books/all", (req, res) => res.redirect("/"));
 
 app.get("/books/:status", async (req, res) => {
@@ -120,6 +123,7 @@ app.get("/books/:status", async (req, res) => {
     res.render("index", {
       message: `Books with status: ${status}`,
       books: books,
+      showAddButton: false,
     });
   } catch (err) {
     console.error(err);
@@ -128,10 +132,52 @@ app.get("/books/:status", async (req, res) => {
 
 });
 
+// Editing books
+app.get("/edit-book/:id", async (req, res) => {
+  const bookId = req.params.id;
+  try {
+    const result = await db.query("SELECT * FROM books WHERE id = $1", [bookId]);
+    if (result.rows.length === 0) {
+      return res.status(404).send("Book not found");
+    }
+    const book = result.rows[0];
+    res.render("edit", { book });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server Error");
+  }
+});
+
+app.post("/edit-book/:id", async (req, res) => {
+  const bookId = req.params.id;
+  let { rating, review, status, date_read } = req.body;
+
+  if (!date_read) {
+    date_read = null;
+  }
+
+  try {
+    await db.query(
+      `UPDATE books 
+       SET rating = $1, review = $2, status = $3, date_read = $4 
+       WHERE id = $5`,
+      [rating, review, status, date_read, bookId]
+    );
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error updating book:", error);
+    res.status(500).send("Server Error");
+  }
+});
+
+
+
+// Deleting books
 app.post("/delete-book/:id", async (req, res) => {
   const bookId = req.params.id;
   try {
     await db.query("DELETE FROM books WHERE id = $1", [bookId]);
+    await db.query("SELECT setval(pg_get_serial_sequence('books', 'id'), COALESCE((SELECT MAX(id) FROM books), 0) + 1, false)");
     res.redirect("/");
   } catch (error) {
     console.error("Error deleting book:", error);
