@@ -34,11 +34,24 @@ h2 {
   letter-spacing: 0.5px;
 }
 
-.h2-books {
+.h2-books{
   display: flex;
-  justify-content: space-around;
-  margin-top: 2em;
-  margin-bottom: 1em;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin: 2rem 0;
+}
+
+.h2-books a {
+  text-decoration: none;
+  color: #4a6073;
+  font-size: 1.2rem;
+  transition: color 0.2s;
+}
+
+.h2-books a:hover {
+  color: #ff9900;
 }
 
 .book-list {
