@@ -97,6 +97,37 @@ app.post("/add-book", async (req, res) => {
   }
 });
 
+app.get("/books/all", (req, res) => res.redirect("/"));
+
+app.get("/books/:status", async (req, res) => {
+  const status = req.params.status; 
+  const validStatuses = ["all", "reading", "planned", "finished"];
+
+  if (!validStatuses.includes(status)) {
+    return res.status(400).send("Invalid status");
+  }
+  try {
+    let query = "SELECT * FROM books";
+    let queryParams = [];
+    if (status !== "all") {
+      query += " WHERE status = $1";
+      queryParams.push(status);
+    }
+    query += " ORDER BY id DESC";
+
+    const result = await db.query(query, queryParams);
+    const books = result.rows;
+    res.render("index", {
+      message: `Books with status: ${status}`,
+      books: books,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+
+});
+
 app.post("/delete-book/:id", async (req, res) => {
   const bookId = req.params.id;
   try {
