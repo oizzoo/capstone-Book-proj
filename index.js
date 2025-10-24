@@ -42,7 +42,7 @@ app.get("/", async (req, res) => {
     const result = await db.query("SELECT * FROM books ORDER BY id DESC");
     const books = result.rows;
     res.render("index", {
-      message: "Welcome to your personal library – track the books you've read, plan the ones you want to read, and manage your reading journey!",
+      message: "Your Reading Hub: Manage Your Books, Plan Your Journey!",
       books: books,
       showAddButton: true,
     });
@@ -54,6 +54,11 @@ app.get("/", async (req, res) => {
 
 app.post("/add-book", async (req, res) => {
   let { title, rating, review, date_read, status  } = req.body;
+
+  if (!rating || rating < 0 || rating > 10) {
+    return res.status(400).send("Rating must be between 0 and 10");
+  }
+  
   if (!date_read) {
     date_read = null;
   }
