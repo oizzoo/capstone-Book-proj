@@ -3,6 +3,8 @@ import bodyParser from "body-parser";
 import axios from "axios";
 import pg from "pg";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 dotenv.config();
 
 const db = new pg.Client({
@@ -18,11 +20,17 @@ db.connect();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+
 
 // search function
 async function searchByTitle(title) {
