@@ -1,29 +1,18 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import BooksList from "./components/BooksList";
+import AddBookForm from "./components/AddBookForm";
 
 function App() {
-  const [books, setBooks] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
-    fetch("/api/books")
-      .then((res) => res.json())
-      .then((data) => setBooks(data))
-      .catch((err) => console.error("Error fetching books:", err));
-  }, []);
+    setRefresh(false);
+  }, [refresh]);
 
   return (
     <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-      <h1>📚 My Books</h1>
-      {books.length === 0 ? (
-        <p>No books yet.</p>
-      ) : (
-        <ul>
-          {books.map((book) => (
-            <li key={book.id}>
-              <strong>{book.title}</strong> — {book.author} ({book.status})
-            </li>
-          ))}
-        </ul>
-      )}
+      <BooksList key={refresh ? "refresh" : "static"} />
+      <AddBookForm onBookAdded={() => setRefresh(true)} />
     </div>
   );
 }
