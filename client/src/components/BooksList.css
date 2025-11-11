@@ -31,3 +31,25 @@
   color: #666;
   font-style: italic;
 }
+
+.actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actions button {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:first-child {
+  background-color: #ffd966;
+}
+
+.actions button:last-child {
+  background-color: #ff6f6f;
+  color: white;
+}

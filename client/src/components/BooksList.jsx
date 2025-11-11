@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./BooksList.css";
 
-export default function BooksList() {
+export default function BooksList({ onEdit, onDelete }) {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
@@ -10,6 +10,20 @@ export default function BooksList() {
       .then((data) => setBooks(data))
       .catch((err) => console.error("Error fetching books:", err));
   }, []);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this book?")) return;
+
+    const res = await fetch(`/delete-book/${id}`, {
+      method: "POST",
+    });
+
+    if (res.ok) {
+      setBooks((prev) => prev.filter((book) => book.id !== id));
+    } else {
+      console.error("Failed to delete book");
+    }
+  };
 
   return (
     <div className="books-container">
@@ -32,6 +46,11 @@ export default function BooksList() {
                 <p>Status: {book.status}</p>
                 <p>⭐ {book.rating}/10</p>
                 <p>{book.review}</p>
+
+                <div className="actions">
+                  <button onClick={() => onEdit(book)}>✏️ Edit</button>
+                  <button onClick={() => handleDelete(book.id)}>🗑️ Delete</button>
+                </div>
               </div>
             </li>
           ))}
