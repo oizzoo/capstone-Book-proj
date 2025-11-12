@@ -1,0 +1,111 @@
+.nav {
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  z-index: 1000;
+  font-family: "Segoe UI", sans-serif;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #e65b65;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logo h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.book-icon {
+  width: 28px;
+  height: 28px;
+  stroke: #e65b65;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover .book-icon {
+  transform: scale(1.15) rotate(5deg);
+}
+
+.links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+.links a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.links a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 0;
+  left: 50%;
+  background-color: #e65b65;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.links a:hover {
+  color: #e65b65;
+}
+
+.links a:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+  .nav {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .logo h2 {
+    font-size: 1.3rem;
+  }
+
+  .book-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .links {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo h2 {
+    font-size: 1.1rem;
+  }
+  .book-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
