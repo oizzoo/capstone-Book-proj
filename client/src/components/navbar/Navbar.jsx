@@ -21,7 +21,7 @@ function Navbar() {
 
   return (
     <nav className="nav">
-      <div className="logo" onClick={() => window.location.href = "/"}>
+      <div className="logo" onClick={() => window.location.href = "capstone-Book-proj/"}>
         <BookIcon />
         <h2>BookTracker</h2>
       </div>
