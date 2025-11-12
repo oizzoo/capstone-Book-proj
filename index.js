@@ -5,6 +5,8 @@ import pg from "pg";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
+import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 const db = new pg.Client({
@@ -17,7 +19,7 @@ const db = new pg.Client({
 
 db.connect();
 
-
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const app = express();
 const port = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
@@ -25,11 +27,21 @@ const __dirname = path.dirname(__filename);
 
 
 // Middleware
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "ejs");
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
 
 
 // search function
@@ -60,11 +72,47 @@ app.get("/", async (req, res) => {
   }
 });
 
-app.post("/add-book", async (req, res) => {
+app.post("/auth/google", async (req, res) => {
+  const { credential } = req.body;
+
+  try {
+    const userInfo = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${credential}` }
+    });
+
+    const payload = userInfo.data;
+    const googleId = payload.sub;
+    const email = payload.email;
+    const name = payload.name;
+
+    let userResult = await db.query("SELECT * FROM users WHERE google_id = $1", [googleId]);
+    let user;
+
+    if (userResult.rows.length === 0) {
+      const insertResult = await db.query(
+        "INSERT INTO users (google_id, email, name) VALUES ($1, $2, $3) RETURNING *",
+        [googleId, email, name]
+      );
+      user = insertResult.rows[0];
+    } else {
+      user = userResult.rows[0];
+    }
+
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+
+  } catch (error) {
+    console.error("Google auth error:", error.response?.data || error.message);
+    res.status(401).json({ message: "Invalid Google token" });
+  }
+});
+
+app.post("/add-book", authenticateToken, async (req, res) => {
+  const userId = req.user.id;
   let { title, rating, review, date_read, status  } = req.body;
 
-  if (!rating || rating < 0 || rating > 10) {
-    return res.status(400).send("Rating must be between 0 and 10");
+  if (!title || !rating || rating < 0 || rating > 10) {
+    return res.status(400).json({ error: "Title and rating are required and rating must be between 0 and 10." });
   }
   
   if (!date_read) {
@@ -77,7 +125,7 @@ app.post("/add-book", async (req, res) => {
     const books = await searchByTitle(cleanedTitle);
 
     if (!books || books.length === 0) {
-      return res.status(404).send("Book not found in Open Library.");
+      return res.status(404).json({ error: "Book not found in Open Library." });
     }
 
     const book = books[0];
@@ -91,23 +139,35 @@ app.post("/add-book", async (req, res) => {
 
     // check for duplicate
     const existing = await db.query(
-      "SELECT * FROM books WHERE title = $1 AND author = $2",
-      [bookTitle, author]
+      "SELECT * FROM books WHERE title = $1 AND author = $2 AND user_id = $3",
+      [bookTitle, author, userId]
     );
 
     if (existing.rows.length > 0) {
-      return res.status(409).send("Book already exists in your library.");
+      return res.status(409).send("You already have this book in your library.");
     }
 
     await db.query(
-      "INSERT INTO books (title, author, rating, review, date_read, cover_url, status) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [bookTitle, author, rating, review, date_read, bookCover, status ]
+      "INSERT INTO books (title, author, rating, review, date_read, cover_url, status, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
+      [bookTitle, author, rating, review, date_read, bookCover, status, userId]
     );
 
-    res.redirect("/");
+    res.status(201).json({ message: "Book added successfully" });
   } catch (error) {
     console.error("Whoops, we got an error while adding book:", error);
     res.status(500).send("Server Error");
+  }
+});
+
+// === API endpoint for React frontend ===
+app.get("/api/books", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await db.query("SELECT * FROM books WHERE user_id = $1 ORDER BY id DESC", [userId]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
@@ -146,35 +206,25 @@ app.get("/books/:status", async (req, res) => {
 });
 
 // Editing books
-app.get("/edit-book/:id", async (req, res) => {
+app.post("/edit-book/:id", authenticateToken, async (req, res) => {
   const bookId = req.params.id;
-  try {
-    const result = await db.query("SELECT * FROM books WHERE id = $1", [bookId]);
-    if (result.rows.length === 0) {
-      return res.status(404).send("Book not found");
-    }
-    const book = result.rows[0];
-    res.render("edit", { book });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Server Error");
-  }
-});
-
-app.post("/edit-book/:id", async (req, res) => {
-  const bookId = req.params.id;
+  const userId = req.user.id;
   let { rating, review, status, date_read } = req.body;
 
-  if (!date_read) {
-    date_read = null;
-  }
+  if (!date_read) date_read = null;
 
   try {
+    // SPRAWDŹ, CZY KSIĄŻKA JEST TWOJA
+    const check = await db.query("SELECT * FROM books WHERE id = $1 AND user_id = $2", [bookId, userId]);
+    if (check.rows.length === 0) {
+      return res.status(403).send("You can only edit your own books.");
+    }
+
     await db.query(
       `UPDATE books 
        SET rating = $1, review = $2, status = $3, date_read = $4 
-       WHERE id = $5`,
-      [rating, review, status, date_read, bookId]
+       WHERE id = $5 AND user_id = $6`,
+      [rating, review, status, date_read, bookId, userId]
     );
     res.redirect("/");
   } catch (error) {
@@ -183,14 +233,18 @@ app.post("/edit-book/:id", async (req, res) => {
   }
 });
 
-
-
 // Deleting books
-app.post("/delete-book/:id", async (req, res) => {
+app.post("/delete-book/:id", authenticateToken, async (req, res) => {
   const bookId = req.params.id;
+  const userId = req.user.id;
+  
   try {
-    await db.query("DELETE FROM books WHERE id = $1", [bookId]);
-    await db.query("SELECT setval(pg_get_serial_sequence('books', 'id'), COALESCE((SELECT MAX(id) FROM books), 0) + 1, false)");
+    const check = await db.query("SELECT * FROM books WHERE id = $1 AND user_id = $2", [bookId, userId]);
+    if (check.rows.length === 0) {
+      return res.status(403).send("You can only delete your own books.");
+    }
+
+    await db.query("DELETE FROM books WHERE id = $1 AND user_id = $2", [bookId, userId]);
     res.redirect("/");
   } catch (error) {
     console.error("Error deleting book:", error);
