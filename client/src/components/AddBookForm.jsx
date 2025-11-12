@@ -1,12 +1,13 @@
-import { useState } from "react";
+import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 export default function AddBookForm({ onBookAdded }) {
   const [formData, setFormData] = useState({
-    title: "",
-    rating: "",
-    review: "",
-    date_read: "",
-    status: "planned",
+    title: '',
+    author: '',
+    rating: '',
+    review: '',
+    status: 'planned',
   });
 
   const handleChange = (e) => {
@@ -16,40 +17,33 @@ export default function AddBookForm({ onBookAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Log in first!");
-      return;
-    }
+    const { data: user } = await supabase.auth.getUser();
 
-    const res = await fetch("http://localhost:3001/add-book", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const { error } = await supabase.from('books').insert([
+      {
+        ...formData,
+        user_id: user.id,
       },
-      body: JSON.stringify(formData),
-    });
+    ]);
 
-    if (res.ok) {
+    if (error) {
+      console.error('Error adding book:', error);
+      alert('Error adding book');
+    } else {
+      alert('Book added!');
       onBookAdded();
       setFormData({
-        title: "",
-        rating: "",
-        review: "",
-        date_read: "",
-        status: "planned",
+        title: '',
+        author: '',
+        rating: '',
+        review: '',
+        status: 'planned',
       });
-    } else {
-      const errorText = await res.text();
-      console.error("Error adding book:", errorText);
-      alert("Error: " + errorText);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "2rem" }}>
-      <h2>Add a new book</h2>
+    <form onSubmit={handleSubmit}>
       <input
         name="title"
         placeholder="Title"
@@ -58,25 +52,24 @@ export default function AddBookForm({ onBookAdded }) {
         required
       />
       <input
+        name="author"
+        placeholder="Author"
+        value={formData.author}
+        onChange={handleChange}
+      />
+      <input
         name="rating"
-        placeholder="Rating (0–10)"
         type="number"
-        min="0"
+        min="1"
         max="10"
+        placeholder="Rating"
         value={formData.rating}
         onChange={handleChange}
-        required
       />
       <input
         name="review"
         placeholder="Review"
         value={formData.review}
-        onChange={handleChange}
-      />
-      <input
-        name="date_read"
-        type="date"
-        value={formData.date_read}
         onChange={handleChange}
       />
       <select name="status" value={formData.status} onChange={handleChange}>
