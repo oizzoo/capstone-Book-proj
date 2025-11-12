@@ -21,10 +21,10 @@ function Navbar() {
 
   return (
     <nav className="nav">
-      <div className="logo" onClick={() => window.location.href = "capstone-Book-proj/"}>
+      <a href="https://oizzoo.github.io/capstone-Book-proj/" className="logo">
         <BookIcon />
         <h2>BookTracker</h2>
-      </div>
+      </a>
 
       <ul className="links">
         <li><a href="#to-read">To Read</a></li>
