@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../index.css";
 
 export default function EditBookForm({ book, onCancel, onUpdated }) {
   const [formData, setFormData] = useState({
@@ -15,16 +16,27 @@ export default function EditBookForm({ book, onCancel, onUpdated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(`/edit-book/${book.id}`, {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("You must be logged in to edit a book.");
+      return;
+    }
+
+    const res = await fetch(`http://localhost:3001/edit-book/${book.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(formData),
     });
 
     if (res.ok) {
       onUpdated();
     } else {
-      console.error("Error updating book");
+      const errorText = await res.text();
+      console.error("Error updating book:", errorText);
+      alert("Error: " + errorText);
     }
   };
 
@@ -35,8 +47,11 @@ export default function EditBookForm({ book, onCancel, onUpdated }) {
         name="rating"
         placeholder="Rating (0–10)"
         type="number"
+        min="0"
+        max="10"
         value={formData.rating}
         onChange={handleChange}
+        required
       />
       <input
         name="review"
@@ -57,7 +72,11 @@ export default function EditBookForm({ book, onCancel, onUpdated }) {
       />
       <div style={{ marginTop: "1rem" }}>
         <button type="submit">Save</button>
-        <button type="button" onClick={onCancel} style={{ marginLeft: "1rem" }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{ marginLeft: "1rem" }}
+        >
           Cancel
         </button>
       </div>
