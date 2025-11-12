@@ -16,14 +16,23 @@ export default function AddBookForm({ onBookAdded }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const res = await fetch("/add-book", {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Log in first!");
+      return;
+    }
+
+    const res = await fetch("http://localhost:3001/add-book", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(formData),
     });
 
     if (res.ok) {
-      onBookAdded(); // odśwież listę po dodaniu
+      onBookAdded();
       setFormData({
         title: "",
         rating: "",
@@ -32,7 +41,9 @@ export default function AddBookForm({ onBookAdded }) {
         status: "planned",
       });
     } else {
-      console.error("Error adding book");
+      const errorText = await res.text();
+      console.error("Error adding book:", errorText);
+      alert("Error: " + errorText);
     }
   };
 
@@ -50,6 +61,8 @@ export default function AddBookForm({ onBookAdded }) {
         name="rating"
         placeholder="Rating (0–10)"
         type="number"
+        min="0"
+        max="10"
         value={formData.rating}
         onChange={handleChange}
         required
