@@ -10,7 +10,12 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://oizzoo.github.io/capstone-Book-proj'
+      }
+    });
   };
 
   const handleLogout = async () => {
@@ -23,7 +28,7 @@ export default function Login() {
       className="google-login-button"
       onClick={user ? handleLogout : handleLogin}
     >
-      {user ? 'Logout' : 'Sign in with Google'}
+      {user ? 'Logout' : 'Sign in'}
     </button>
   );
 }
