@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
-import "./AddBookForm.css";
 
 export default function AddBookForm({ onBookAdded }) {
   const [formData, setFormData] = useState({
