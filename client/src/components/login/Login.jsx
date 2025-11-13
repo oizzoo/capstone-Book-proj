@@ -10,12 +10,22 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: 'https://oizzoo.github.io/capstone-Book-proj'
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'https://oizzoo.github.io/capstone-Book-proj'
+        }
+      });
+      if (error) {
+        console.error('Login error:', error.message);
+        alert(`Login error: ${error.message}`);
+      } else {
+        console.log('Login redirect data:', data);
       }
-    });
+    } catch (err) {
+      console.error('Unexpected login error:', err);
+    }
   };
 
   const handleLogout = async () => {

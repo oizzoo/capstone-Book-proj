@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../index.css";
+import { supabase } from "../supabaseClient";
 
 export default function EditBookForm({ book, onCancel, onUpdated }) {
   const [formData, setFormData] = useState({
@@ -16,27 +16,20 @@ export default function EditBookForm({ book, onCancel, onUpdated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("You must be logged in to edit a book.");
-      return;
-    }
+    const { error } = await supabase
+      .from("books")
+      .update({
+        rating: formData.rating,
+        review: formData.review,
+        status: formData.status,
+        date_read: formData.date_read || null,
+      })
+      .eq("id", book.id);
 
-    const res = await fetch(`http://localhost:3001/edit-book/${book.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(formData),
-    });
-
-    if (res.ok) {
-      onUpdated();
+    if (error) {
+      alert("Error updating book: " + error.message);
     } else {
-      const errorText = await res.text();
-      console.error("Error updating book:", errorText);
-      alert("Error: " + errorText);
+      onUpdated();
     }
   };
 
@@ -72,11 +65,7 @@ export default function EditBookForm({ book, onCancel, onUpdated }) {
       />
       <div style={{ marginTop: "1rem" }}>
         <button type="submit">Save</button>
-        <button
-          type="button"
-          onClick={onCancel}
-          style={{ marginLeft: "1rem" }}
-        >
+        <button type="button" onClick={onCancel} style={{ marginLeft: "1rem" }}>
           Cancel
         </button>
       </div>
