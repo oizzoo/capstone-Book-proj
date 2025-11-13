@@ -2,43 +2,49 @@ import { useState, useEffect } from "react";
 import Navbar from "./components/navbar/Navbar";
 import BooksList from "./components/BooksList";
 import AddBookForm from "./components/AddBookForm";
-import EditBookForm from "./components/EditBookForm";
+import { supabase } from "./supabaseClient";
+import { getBooks, addBook } from "./api/books";
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [refresh, setRefresh] = useState(false);
+  const [user, setUser] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkLogin = () => setIsLoggedIn(!!localStorage.getItem("token"));
-    checkLogin();
-    window.addEventListener("storage", checkLogin);
-    return () => window.removeEventListener("storage", checkLogin);
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  const handleBookUpdated = () => {
-    setSelectedBook(null);
-    setRefresh(!refresh);
+  useEffect(() => {
+    if (user) {
+      getBooks(user.id).then(setBooks);
+    }
+  }, [user]);
+
+  const handleAddBook = async (bookData) => {
+    const newBook = { ...bookData, user_id: user.id };
+    await addBook(newBook);
+    const updatedBooks = await getBooks(user.id);
+    setBooks(updatedBooks);
   };
 
-  if (!isLoggedIn) {
+  if (loading) return <p>Loading...</p>;
+
+  if (!user) {
     return (
       <>
         <Navbar />
-        <div
-          style={{
-            padding: "4rem 2rem",
-            textAlign: "center",
-            fontFamily: "sans-serif",
-            color: "#444",
-          }}
-        >
-          <h1 style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>
-            Log in to start tracking your books!
-          </h1>
-          <p style={{ fontSize: "1.2rem", marginBottom: "2rem", color: "#666" }}>
-            Sign in with Google to add, edit, and organize your reading list.
-          </p>
+        <div style={{ padding: "4rem", textAlign: "center" }}>
+          <h1>Log in to start tracking your books!</h1>
+          <p>Sign in with Google to add, edit, and organize your reading list.</p>
         </div>
       </>
     );
@@ -47,25 +53,9 @@ function App() {
   return (
     <>
       <Navbar />
-
-      <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
-        {!selectedBook ? (
-          <>
-            <AddBookForm onBookAdded={() => setRefresh(!refresh)} />
-
-            <BooksList
-              key={refresh}
-              onEdit={setSelectedBook}
-              onDelete={() => setRefresh(!refresh)}
-            />
-          </>
-        ) : (
-          <EditBookForm
-            book={selectedBook}
-            onCancel={() => setSelectedBook(null)}
-            onUpdated={handleBookUpdated}
-          />
-        )}
+      <div style={{ padding: "2rem" }}>
+        <AddBookForm onBookAdded={handleAddBook} />
+        <BooksList books={books} />
       </div>
     </>
   );
