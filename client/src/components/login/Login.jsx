@@ -40,7 +40,7 @@ export default function Login() {
 
   // Secret VIP Login
   const handleSecretLogin = async () => {
-    if (secretCode.toLowerCase() === 'china') {
+    if (secretCode === process.env.REACT_APP_VIP_SECRET_CODE) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: process.env.REACT_APP_VIP_EMAIL,
