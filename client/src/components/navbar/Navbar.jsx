@@ -1,7 +1,10 @@
 import "./Navbar.css";
 import Login from "../login/Login";
+import { useAuth } from "../../context/AuthContext";
 
 function Navbar() {
+  const { user } = useAuth();
+
   const BookIcon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -21,16 +24,27 @@ function Navbar() {
 
   return (
     <nav className="nav">
-      <div className="logo" onClick={() => window.location.href = "https://oizzoo.github.io/capstone-Book-proj/"}>
-        <BookIcon />
-        <h2>BookTracker</h2>
-      </div>
+      <div
+        className="logo"
+        onClick={() =>
+          (window.location.href = "https://oizzoo.github.io/capstone-Book-proj/")
+        }
+      >
+        <BookIcon />
+        <h2>BookTracker</h2>
+      </div>
 
       <ul className="links">
-        <li><a href="#to-read">To Read</a></li>
-        <li><a href="#reading">Reading</a></li>
-        <li><a href="#read">Read</a></li>
-        <li><Login /></li>
+        {!user ? (
+          <li><Login /></li>
+        ) : (
+          <>
+            <li><a href="#to-read">To Read</a></li>
+            <li><a href="#reading">Reading</a></li>
+            <li><a href="#read">Read</a></li>
+            <li><Login /></li>
+          </>
+        )}
       </ul>
     </nav>
   );

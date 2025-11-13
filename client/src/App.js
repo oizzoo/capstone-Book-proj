@@ -1,32 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./components/navbar/Navbar";
 import BooksList from "./components/BooksList";
 import AddBookForm from "./components/AddBookForm";
-import { supabase } from "./supabaseClient";
+import { useAuth } from "./context/AuthContext";
 import { getBooks, addBook } from "./api/books";
 
 function App() {
-  const [user, setUser] = useState(null);
+  const { user, loading } = useAuth();
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-      setLoading(false);
-    });
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
-
-    return () => listener.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      getBooks(user.id).then(setBooks);
-    }
+    if (user) getBooks(user.id).then(setBooks);
   }, [user]);
 
   const handleAddBook = async (bookData) => {
