@@ -1,68 +1,61 @@
 import { useState } from "react";
-import { supabase } from "../supabaseClient";
 
-export default function EditBookForm({ book, onCancel, onUpdated }) {
-  const [formData, setFormData] = useState({
-    rating: book.rating,
+export default function EditBookForm({ book, onCancel, onSave }) {
+  const [form, setForm] = useState({
+    rating: book.rating || "",
     review: book.review || "",
     status: book.status || "planned",
-    date_read: book.date_read ? book.date_read.split("T")[0] : "",
+    date_read: book.date_read || "",
   });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    const { error } = await supabase
-      .from("books")
-      .update({
-        rating: formData.rating,
-        review: formData.review,
-        status: formData.status,
-        date_read: formData.date_read || null,
-      })
-      .eq("id", book.id);
-
-    if (error) {
-      alert("Error updating book: " + error.message);
-    } else {
-      onUpdated();
-    }
+    const cleanForm = {
+      ...form,
+      date_read: form.date_read === "" ? null : form.date_read
+    };
+    onSave(cleanForm);
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: "2rem" }}>
-      <h2>Edit Book: {book.title}</h2>
+    <form onSubmit={handleSubmit} className="edit-form" style={{ marginTop: "2rem" }}>
+      <h2>Edit: {book.title}</h2>
+
       <input
-        name="rating"
-        placeholder="Rating (0–10)"
         type="number"
+        name="rating"
         min="0"
         max="10"
-        value={formData.rating}
+        value={form.rating}
         onChange={handleChange}
-        required
+        placeholder="Rating"
       />
+
       <input
+        type="text"
         name="review"
-        placeholder="Review"
-        value={formData.review}
+        value={form.review}
         onChange={handleChange}
+        placeholder="Review"
       />
-      <select name="status" value={formData.status} onChange={handleChange}>
+
+      <select name="status" value={form.status} onChange={handleChange}>
         <option value="planned">Planned</option>
         <option value="reading">Reading</option>
         <option value="finished">Finished</option>
       </select>
+
       <input
-        name="date_read"
         type="date"
-        value={formData.date_read}
+        name="date_read"
+        value={form.date_read || ""}
         onChange={handleChange}
       />
+
       <div style={{ marginTop: "1rem" }}>
         <button type="submit">Save</button>
         <button type="button" onClick={onCancel} style={{ marginLeft: "1rem" }}>

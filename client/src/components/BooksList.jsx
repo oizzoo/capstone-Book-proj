@@ -1,6 +1,6 @@
 import "./BooksList.css";
 
-export default function BooksList({ books }) {
+export default function BooksList({ books, onEdit, onDelete  }) {
   if (!books.length) {
     return <p>No books yet. Add one below!</p>;
   }
@@ -18,6 +18,13 @@ export default function BooksList({ books }) {
               <p>Status: {book.status}</p>
               <p>⭐ {book.rating}/10</p>
               <p>{book.review}</p>
+              {book.date_read && (
+                <p>📅 Read on: {new Date(book.date_read).toLocaleDateString()}</p>
+              )}
+            </div>
+            <div className="actions">
+              <button onClick={() => onEdit(book)}>Edit</button>
+              <button onClick={() => onDelete(book.id)}>Delete</button>
             </div>
           </li>
         ))}
