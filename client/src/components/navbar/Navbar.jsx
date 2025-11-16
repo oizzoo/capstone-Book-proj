@@ -1,9 +1,25 @@
+import { useState, useEffect } from "react";
+import { supabase } from "../../supabaseClient";
+import EditableUsername from "./EditableUsername";
 import "./Navbar.css";
 import Login from "../login/Login";
-import { useAuth } from "../../context/AuthContext";
 
 function Navbar() {
-  const { user } = useAuth();
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Pobierz aktualnego użytkownika
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // Nasłuchuj zmian auth
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const BookIcon = () => (
     <svg
@@ -24,28 +40,19 @@ function Navbar() {
 
   return (
     <nav className="nav">
-      <div
-        className="logo"
-        onClick={() =>
-          (window.location.href = "https://oizzoo.github.io/capstone-Book-proj/")
-        }
+      <div 
+        className="logo" 
+        onClick={() => window.location.reload()}
+        style={{ cursor: 'pointer' }}
       >
         <BookIcon />
         <h2>BookTracker</h2>
       </div>
 
-      <ul className="links">
-        {!user ? (
-          <li><Login /></li>
-        ) : (
-          <>
-            <li><a href="#to-read">To Read</a></li>
-            <li><a href="#reading">Reading</a></li>
-            <li><a href="#read">Read</a></li>
-            <li><Login /></li>
-          </>
-        )}
-      </ul>
+      <div className="nav-right">
+        {user && <EditableUsername user={user} />}
+        <Login />
+      </div>
     </nav>
   );
 }

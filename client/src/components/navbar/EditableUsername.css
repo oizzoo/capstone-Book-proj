@@ -1,0 +1,106 @@
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f7f9fb;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.user-info:not(.editing) {
+  cursor: pointer;
+}
+
+.user-info:not(.editing):hover {
+  background: #e8f0f5;
+  transform: scale(1.02);
+}
+
+.user-icon {
+  font-size: 1.2rem;
+}
+
+.user-name {
+  color: #333;
+  font-weight: 500;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-name.editable {
+  border-bottom: 1px dashed transparent;
+}
+
+.user-info:hover .user-name.editable {
+  border-bottom-color: #e65b65;
+}
+
+.edit-icon {
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.user-info:hover .edit-icon {
+  opacity: 1;
+}
+
+.username-input {
+  border: 2px solid #e65b65;
+  background: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #333;
+  outline: none;
+  width: 150px;
+}
+
+.username-input:focus {
+  border-color: #d14d57;
+}
+
+.loading-spinner {
+  font-size: 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-info {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .user-name {
+    max-width: 120px;
+  }
+
+  .username-input {
+    width: 120px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-name {
+    max-width: 100px;
+    font-size: 0.85rem;
+  }
+
+  .username-input {
+    width: 100px;
+    font-size: 0.85rem;
+  }
+}

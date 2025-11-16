@@ -19,6 +19,12 @@
   color: #e65b65;
   font-weight: 700;
   letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.02);
 }
 
 .logo h2 {
@@ -37,51 +43,41 @@
   transform: scale(1.15) rotate(5deg);
 }
 
-.links {
-  list-style: none;
+.nav-right {
   display: flex;
-  gap: 2rem;
-  margin: 0;
-  padding: 0;
+  align-items: center;
+  gap: 1.5rem;
 }
 
-.links a {
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f7f9fb;
+  border-radius: 20px;
+  font-size: 0.95rem;
+}
+
+.user-icon {
+  font-size: 1.2rem;
+}
+
+.user-name {
   color: #333;
-  text-decoration: none;
   font-weight: 500;
-  font-size: 1.1rem;
-  padding: 0.5rem 0;
-  position: relative;
-  transition: color 0.2s ease;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.links a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 50%;
-  background-color: #e65b65;
-  transition: width 0.3s ease, left 0.3s ease;
-}
-
-.links a:hover {
-  color: #e65b65;
-}
-
-.links a:hover::after {
-  width: 100%;
-  left: 0;
-}
-
-
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 1024px) {
+/* Responsive */
+@media (max-width: 768px) {
   .nav {
     flex-direction: column;
-    padding: 1rem;
     gap: 1rem;
+    padding: 1rem;
   }
 
   .logo h2 {
@@ -93,10 +89,18 @@
     height: 24px;
   }
 
-  .links {
-    gap: 1.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
+  .nav-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-info {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .user-name {
+    max-width: 120px;
   }
 }
 
@@ -104,8 +108,14 @@
   .logo h2 {
     font-size: 1.1rem;
   }
+  
   .book-icon {
     width: 22px;
     height: 22px;
+  }
+
+  .user-name {
+    max-width: 100px;
+    font-size: 0.85rem;
   }
 }
