@@ -1,6 +1,12 @@
 .books-container {
-  padding: 2rem;
   font-family: "Segoe UI", sans-serif;
+}
+
+.no-books-message {
+  text-align: center;
+  padding: 4rem 2rem;
+  font-size: 1.2rem;
+  color: #999;
 }
 
 .books-list {
@@ -8,48 +14,160 @@
   padding: 0;
   display: grid;
   gap: 1.5rem;
+  margin: 0;
 }
 
 .book-card {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 8px;
-  background: #f7f9fb;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.book-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .book-cover {
-  width: 90px;
-  height: 130px;
+  width: 100px;
+  height: 145px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.book-info {
+  flex: 1;
+}
+
+.book-info h2 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  color: #333;
 }
 
 .author {
   color: #666;
   font-style: italic;
+  margin: 0.25rem 0;
+  font-size: 1rem;
+}
+
+.status {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.planned {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.reading {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.status-badge.finished {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.rating {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  color: #333;
+  font-weight: 500;
+}
+
+.review {
+  margin: 0.75rem 0;
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.date-read {
+  margin: 0.5rem 0;
+  color: #888;
+  font-size: 0.9rem;
 }
 
 .actions {
-  margin-top: 1rem;
   display: flex;
+  flex-direction: column;
   gap: 0.5rem;
+  align-items: flex-end;
 }
 
 .actions button {
-  padding: 0.4rem 0.8rem;
+  padding: 0.5rem 1rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  min-width: 80px;
 }
 
-.actions button:first-child {
-  background-color: #ffd966;
+.btn-edit {
+  background: #ffd966;
+  color: #333;
 }
 
-.actions button:last-child {
-  background-color: #ff6f6f;
+.btn-edit:hover {
+  background: #ffc933;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background: #ff6f6f;
   color: white;
+}
+
+.btn-delete:hover {
+  background: #ff4d4d;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .book-card {
+    flex-direction: column;
+  }
+
+  .book-cover {
+    width: 100%;
+    height: auto;
+    max-width: 200px;
+    margin: 0 auto;
+  }
+
+  .actions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .actions button {
+    flex: 1;
+  }
 }

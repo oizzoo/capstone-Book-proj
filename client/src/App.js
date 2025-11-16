@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/navbar/Navbar";
 import BooksList from "./components/BooksList";
-import AddBookForm from "./components/AddBookForm";
+import BooksHeader from "./components/BooksHeader";
+import AddBookModal from "./components/AddBookModal";
 import EditBookForm from "./components/EditBookForm";
 import { supabase } from "./supabaseClient";
 import { useAuth } from "./context/AuthContext";
@@ -10,12 +11,32 @@ import { getBooks, addBook } from "./api/books";
 function App() {
   const { user, loading } = useAuth();
   const [books, setBooks] = useState([]);
+  const [filteredBooks, setFilteredBooks] = useState([]);
   const [editingBook, setEditingBook] = useState(null);
-
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   useEffect(() => {
-    if (user) getBooks(user.id).then(setBooks);
+    if (user) {
+      getBooks(user.id).then(data => {
+        setBooks(data);
+        setFilteredBooks(data);
+      });
+    }
   }, [user]);
+
+  // Filter books when filter changes
+  useEffect(() => {
+    if (activeFilter === 'all') {
+      setFilteredBooks(books);
+    } else {
+      setFilteredBooks(books.filter(book => book.status === activeFilter));
+    }
+  }, [activeFilter, books]);
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter);
+  };
 
   const handleAddBook = async (bookData) => {
     const newBook = { ...bookData, user_id: user.id };
@@ -26,19 +47,19 @@ function App() {
 
   const handleEditBook = async (bookId, updates) => {
     await supabase
-    .from("books")
-    .update(updates)
-    .eq("id", bookId)
+      .from("books")
+      .update(updates)
+      .eq("id", bookId);
 
     const updated = await getBooks(user.id);
     setBooks(updated);
   };
 
   const handleDeleteBook = async (bookId) => {
-     await supabase
-    .from("books")
-    .delete()
-    .eq("id", bookId);
+    await supabase
+      .from("books")
+      .delete()
+      .eq("id", bookId);
 
     const updated = await getBooks(user.id);
     setBooks(updated);
@@ -61,22 +82,39 @@ function App() {
   return (
     <>
       {editingBook ? (
-        <EditBookForm
-          book={editingBook}
-          onCancel={() => setEditingBook(null)}
-          onSave={async (updates) => {
-            await handleEditBook(editingBook.id, updates);
-            setEditingBook(null);
-          }}
-        />
+        <>
+          <Navbar />
+          <EditBookForm
+            book={editingBook}
+            onCancel={() => setEditingBook(null)}
+            onSave={async (updates) => {
+              await handleEditBook(editingBook.id, updates);
+              setEditingBook(null);
+            }}
+          />
+        </>
       ) : (
         <>
-          <AddBookForm onBookAdded={handleAddBook} />
-          <BooksList 
-            books={books}
-            onEdit={setEditingBook}
-            onDelete={handleDeleteBook}
-          />
+          <Navbar />
+          <div style={{ padding: "2rem" }}>
+            <BooksHeader
+              onFilterChange={handleFilterChange}
+              onAddClick={() => setShowAddModal(true)}
+              activeFilter={activeFilter}
+            />
+            <BooksList
+              books={filteredBooks}
+              onEdit={setEditingBook}
+              onDelete={handleDeleteBook}
+            />
+          </div>
+
+          {showAddModal && (
+            <AddBookModal
+              onClose={() => setShowAddModal(false)}
+              onBookAdded={handleAddBook}
+            />
+          )}
         </>
       )}
     </>
