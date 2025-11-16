@@ -10,33 +10,45 @@ export default function EditableUsername({ user }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    // Pobierz username z tabeli users
-    const fetchUsername = async () => {
-      // Najpierw sprawdź czy user ma google_id czy auth.uid
+    const fetchOrCreateUsername = async () => {
+      if (!user) return;
+
       const userId = user.id;
       
+      // Spróbuj pobrać username z tabeli users
       const { data, error } = await supabase
         .from('users')
-        .select('username, name, email')
+        .select('username')
         .eq('id', userId)
         .single();
 
       if (data?.username) {
+        // Znaleziono username - użyj go
         setUsername(data.username);
-      } else if (data?.name) {
-        // Fallback na name jeśli username nie istnieje
-        setUsername(data.name);
-      } else if (data?.email) {
-        // Ostateczny fallback na email
-        setUsername(data.email.split('@')[0]);
       } else {
-        // Jeśli nie ma rekordu w users, użyj danych z auth
+        // Brak rekordu - stwórz nowy z domyślną nazwą
         const defaultName = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
-        setUsername(defaultName);
+        
+        // Wstaw nowy rekord do tabeli users
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([{ 
+            id: userId, 
+            username: defaultName 
+          }]);
+
+        if (insertError) {
+          console.error('Error creating user record:', insertError);
+          // Jeśli błąd, użyj domyślnej nazwy bez zapisywania
+          setUsername(defaultName);
+        } else {
+          // Sukces - użyj domyślnej nazwy
+          setUsername(defaultName);
+        }
       }
     };
 
-    if (user) fetchUsername();
+    fetchOrCreateUsername();
   }, [user]);
 
   useEffect(() => {
