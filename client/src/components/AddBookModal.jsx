@@ -9,18 +9,24 @@ export default function AddBookModal({ onClose, onBookAdded }) {
     review: "",
     date_read: "",
     status: "planned",
+    useCustomCover: false,
+    customCoverUrl: "",
   });
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setFormData({ 
+      ...formData, 
+      [name]: type === 'checkbox' ? checked : value 
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const { title, rating, review, date_read, status } = formData;
+    const { title, rating, review, date_read, status, useCustomCover, customCoverUrl } = formData;
 
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
@@ -29,24 +35,29 @@ export default function AddBookModal({ onClose, onBookAdded }) {
       return;
     }
 
-    // Fetch OpenLibrary
     let cover_url = "https://via.placeholder.com/150x200?text=No+Cover";
     let author = "Unknown";
 
-    try {
-      const res = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}`);
-      const data = await res.json();
-      if (data.docs && data.docs.length > 0) {
-        const book = data.docs[0];
-        if (book.cover_i) {
-          cover_url = `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`;
+    // Jeśli user chce własną okładkę
+    if (useCustomCover && customCoverUrl.trim()) {
+      cover_url = customCoverUrl.trim();
+    } else {
+      // Normalnie pobierz z OpenLibrary
+      try {
+        const res = await fetch(`https://openlibrary.org/search.json?title=${encodeURIComponent(title)}`);
+        const data = await res.json();
+        if (data.docs && data.docs.length > 0) {
+          const book = data.docs[0];
+          if (book.cover_i) {
+            cover_url = `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`;
+          }
+          if (book.author_name) {
+            author = book.author_name[0];
+          }
         }
-        if (book.author_name) {
-          author = book.author_name[0];
-        }
+      } catch (err) {
+        console.error("OpenLibrary fetch failed:", err);
       }
-    } catch (err) {
-      console.error("OpenLibrary fetch failed:", err);
     }
 
     // Insert to Supabase
@@ -73,6 +84,8 @@ export default function AddBookModal({ onClose, onBookAdded }) {
         review: "",
         date_read: "",
         status: "planned",
+        useCustomCover: false,
+        customCoverUrl: "",
       });
       if (onBookAdded) onBookAdded();
       onClose();
@@ -150,6 +163,35 @@ export default function AddBookModal({ onClose, onBookAdded }) {
               onChange={handleChange}
             />
           </div>
+
+          {/* Custom Cover Section */}
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                name="useCustomCover"
+                checked={formData.useCustomCover}
+                onChange={handleChange}
+              />
+              <span>Use custom cover image</span>
+            </label>
+          </div>
+
+          {formData.useCustomCover && (
+            <div className="form-group custom-cover-input">
+              <label>Cover Image URL</label>
+              <input
+                name="customCoverUrl"
+                type="url"
+                placeholder="https://example.com/image.jpg"
+                value={formData.customCoverUrl}
+                onChange={handleChange}
+              />
+              <small className="help-text">
+                📸 Paste a link to your book cover image (e.g., from Imgur, Google Drive)
+              </small>
+            </div>
+          )}
 
           <div className="modal-actions">
             <button type="button" onClick={onClose} className="btn-cancel">
