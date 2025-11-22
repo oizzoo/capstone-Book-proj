@@ -115,6 +115,21 @@ function App() {
               onBookAdded={handleAddBook}
             />
           )}
+
+          <footer style={{ 
+            textAlign: 'center', 
+            padding: '2rem', 
+            color: '#666',
+            borderTop: '1px solid #e0e0e0',
+            marginTop: '2rem'
+          }}>
+            <a 
+              href="https://oizzoo.github.io/capstone-Book-proj/privacy.html" 
+              style={{ color: '#e65b65', textDecoration: 'none' }}
+            >
+              Privacy Policy
+            </a>
+        </footer>
         </>
       )}
     </>
