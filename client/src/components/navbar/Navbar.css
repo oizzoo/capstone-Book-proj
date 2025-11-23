@@ -72,6 +72,25 @@
   white-space: nowrap;
 }
 
+.demo-badge {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #856404;
+}
+
+@media (max-width: 480px) {
+  .demo-badge {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .nav {

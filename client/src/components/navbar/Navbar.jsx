@@ -4,22 +4,22 @@ import EditableUsername from "./EditableUsername";
 import "./Navbar.css";
 import Login from "../login/Login";
 
-function Navbar() {
+function Navbar({ demoMode, onExitDemo }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Pobierz aktualnego użytkownika
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
+    if (!demoMode) {
+      supabase.auth.getUser().then(({ data }) => {
+        setUser(data.user);
+      });
 
-    // Nasłuchuj zmian auth
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
+      const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user || null);
+      });
 
-    return () => listener.subscription.unsubscribe();
-  }, []);
+      return () => listener.subscription.unsubscribe();
+    }
+  }, [demoMode]);
 
   const BookIcon = () => (
     <svg
@@ -50,8 +50,16 @@ function Navbar() {
       </div>
 
       <div className="nav-right">
-        {user && <EditableUsername user={user} />}
-        <Login />
+        {demoMode ? (
+          <div className="demo-badge">
+            🎭 Demo Mode
+          </div>
+        ) : (
+          <>
+            {user && <EditableUsername user={user} />}
+            <Login />
+          </>
+        )}
       </div>
     </nav>
   );
